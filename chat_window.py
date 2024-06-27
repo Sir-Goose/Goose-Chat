@@ -1,6 +1,8 @@
+from groq.types.chat import chat_completion
 import conversation_box
 import input_box
 import curses
+import chat_engine
 
 class Chat_window:
     def __init__(self, stdscr, conversation=[]):
@@ -35,16 +37,22 @@ class Chat_window:
         self.stdscr.addstr(self.height - 1, 2, "Esc: Send | Ctrl+C: Quit")
 
     def main_loop(self):
+        conversation_history = []
         try:
             while True:
                 user_input = self.input_box.edit()
                 if user_input:
-                    self.conversation_box.add_text(f"You: {user_input}")
+                    self.conversation_box.add_text(f"User: {user_input}")
                     self.input_box.clear()
-                    # Here you would typically send the user_input to your chat model
-                    # and then add the response to the conversation box
-                    # For now, we'll just echo the input
-                    self.conversation_box.add_text(f"Echo: {user_input}")
+
+                    conversation_history.append({"role": "user", "content": user_input})
+                    chat_completion = chat_engine.completion(
+                        "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",
+                        "llama3-8b-8192",
+                        conversation_history)
+
+                    response = chat_completion.choices[0].message.content
+                    self.conversation_box.add_text(f"AI: {response}")
                 self.stdscr.refresh()
         except KeyboardInterrupt:
             pass  # Exit the chat window on Ctrl+C
