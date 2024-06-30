@@ -15,6 +15,7 @@ class Chat_window:
         self.draw_hotkeys()
         self.stdscr.refresh()
         self.main_loop()
+        self.conversation_history = conversation
 
     def draw_title(self):
         title = "Chat"
@@ -34,13 +35,24 @@ class Chat_window:
         return input_box.MultilineChatInputBox(self.stdscr, input_height, input_width, input_y, input_x)
 
     def draw_hotkeys(self):
-        self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | A or I: Input Mode | ~: Send Message | Ctrl+C: Quit")
+        self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | A or I: Input Mode | ~: Send | Ctrl+C: Quit")
         # self.stdscr.addstr(self.height - 1, 2, )
 
+    def request_completion(self, user_input):
+        self.conversation_history.append({"role": "user", "content": user_input})
+        chat_completion = chat_engine.completion(
+            "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",
+            "llama3-8b-8192",
+            self.conversation_history)
+
+        response = chat_completion.choices[0].message.content
+        return response
+
+    def stream_completion(self):
+        pass
 
 
     def main_loop(self):
-        conversation_history = []
         try:
             while True:
                 # check for key press
@@ -65,15 +77,8 @@ class Chat_window:
                 if user_input:
                     self.conversation_box.add_text(f"User: {user_input}")
                     self.input_box.clear()
-
-                    conversation_history.append({"role": "user", "content": user_input})
-                    chat_completion = chat_engine.completion(
-                        "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",
-                        "llama3-8b-8192",
-                        conversation_history)
-
-                    response = chat_completion.choices[0].message.content
-                    self.conversation_box.add_text(f"AI: {response}")
+                    response = self.request_completion(user_input)
+                    self.conversation_box.add_text(f"AI: {response}") # this must be moved
 
                 self.stdscr.refresh()
         except KeyboardInterrupt:
