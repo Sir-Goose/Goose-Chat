@@ -18,6 +18,7 @@ class ConversationBox:
 
     def add_text(self, new_text):
         self.text.extend(new_text.split('\n'))
+        self.scroll_to_bottom()
         self.refresh()
 
     def scroll_up(self):
@@ -29,6 +30,9 @@ class ConversationBox:
         if self.scroll_pos < max(0, len(self.text) - (self.height - 2)):
             self.scroll_pos += 1
             self.refresh()
+
+    def scroll_to_bottom(self):
+        self.scroll_pos = max(0, len(self.text) - (self.height - 2))
 
     def refresh(self):
         self.text_win.clear()

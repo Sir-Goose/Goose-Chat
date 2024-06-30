@@ -34,12 +34,33 @@ class Chat_window:
         return input_box.MultilineChatInputBox(self.stdscr, input_height, input_width, input_y, input_x)
 
     def draw_hotkeys(self):
-        self.stdscr.addstr(self.height - 1, 2, "Esc: Send | Ctrl+C: Quit")
+        self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | A or I: Input Mode | ~: Send Message | Ctrl+C: Quit")
+        # self.stdscr.addstr(self.height - 1, 2, )
+
+
 
     def main_loop(self):
         conversation_history = []
         try:
             while True:
+                # check for key press
+                # if a then input box
+                # else if j, k then scroll
+                #
+                #
+                key = self.stdscr.getch()
+                if key == ord('j'):
+                    self.conversation_box.scroll_down()
+                    continue
+                if key == ord('k'):
+                    self.conversation_box.scroll_up()
+                    continue
+                if key == ord('i') or key == ord('a'):
+                    pass
+                else:
+                    continue
+
+
                 user_input = self.input_box.edit()
                 if user_input:
                     self.conversation_box.add_text(f"User: {user_input}")
@@ -53,6 +74,7 @@ class Chat_window:
 
                     response = chat_completion.choices[0].message.content
                     self.conversation_box.add_text(f"AI: {response}")
+
                 self.stdscr.refresh()
         except KeyboardInterrupt:
             pass  # Exit the chat window on Ctrl+C

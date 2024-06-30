@@ -37,8 +37,10 @@ class MultilineChatInputBox:
                 self.cursor_y += 1
                 self.cursor_x = 0
                 self.scroll_if_needed()
-            elif key == 27:  # Escape key
+            elif key == ord('~'):  # send
                 return "\n".join(self.lines).strip()
+            elif key == 27: # escape
+                return # empty return back to view mode
             elif key in (curses.KEY_BACKSPACE, 127):  # Backspace
                 if self.cursor_x > 0:
                     self.lines[self.cursor_y] = self.lines[self.cursor_y][:self.cursor_x-1] + self.lines[self.cursor_y][self.cursor_x:]
