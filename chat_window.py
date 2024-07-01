@@ -6,9 +6,11 @@ import curses
 import chat_engine
 
 class Chat_window:
-    def __init__(self, stdscr, conversation):
+    def __init__(self, stdscr, conversation, model="llama3-8b-8192", name="New Chat"):
         self.stdscr = stdscr
         self.conversation_history = conversation
+        self.model = model
+        self.name = name
         self.height, self.width = self.stdscr.getmaxyx()
         self.stdscr.clear()
         self.draw_title()
@@ -19,7 +21,7 @@ class Chat_window:
         self.main_loop()
 
     def draw_title(self):
-        title = "Chat"
+        title = f"{self.name} - {self.model}"
         start_x = max(0, (self.width // 2) - (len(title)// 2))
         self.stdscr.addstr(0, start_x, title)
 
@@ -42,7 +44,7 @@ class Chat_window:
         self.conversation_history.append({"role": "user", "content": user_input})
         chat_completion = chat_engine.completion(
             "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",
-            "llama3-8b-8192",
+            self.model,
             self.conversation_history)
 
         response = chat_completion.choices[0].message.content
@@ -53,7 +55,7 @@ class Chat_window:
         client = Groq(api_key="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")
         stream = client.chat.completions.create(
             messages=self.conversation_history,
-            model="llama3-70b-8192",
+            model=self.model,
             stream=True
         )
 
