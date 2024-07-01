@@ -9,6 +9,16 @@ def completion(key, model, conversation_history):
     )
     return chat_completion
 
+def stream_completion(key, model, conversation_history):
+    client = Groq(api_key=key)
+    stream = client.chat.completions.create(
+        messages=conversation_history,
+        model=model,
+        stream=True
+    )
+
+    for chunk in stream:
+        print(chunk.choices[0].delta.content, end="")
 
 # old
 def new_chat():

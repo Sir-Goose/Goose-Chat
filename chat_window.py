@@ -1,3 +1,4 @@
+from groq import Groq
 from groq.types.chat import chat_completion
 import conversation_box
 import input_box
@@ -5,8 +6,9 @@ import curses
 import chat_engine
 
 class Chat_window:
-    def __init__(self, stdscr, conversation=[]):
+    def __init__(self, stdscr, conversation):
         self.stdscr = stdscr
+        self.conversation_history = conversation
         self.height, self.width = self.stdscr.getmaxyx()
         self.stdscr.clear()
         self.draw_title()
@@ -15,7 +17,6 @@ class Chat_window:
         self.draw_hotkeys()
         self.stdscr.refresh()
         self.main_loop()
-        self.conversation_history = conversation
 
     def draw_title(self):
         title = "Chat"
@@ -28,7 +29,7 @@ class Chat_window:
         return conversation_box.ConversationBox(self.stdscr, box_height, box_width, start_y, start_x)
 
     def draw_input_box(self):
-        input_height = 5  # Increased height for multiple lines
+        input_height = 5
         input_width = self.width - 4
         input_y = self.height - input_height - 1
         input_x = 2
@@ -36,7 +37,6 @@ class Chat_window:
 
     def draw_hotkeys(self):
         self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | A or I: Input Mode | ~: Send | Ctrl+C: Quit")
-        # self.stdscr.addstr(self.height - 1, 2, )
 
     def request_completion(self, user_input):
         self.conversation_history.append({"role": "user", "content": user_input})
@@ -48,38 +48,58 @@ class Chat_window:
         response = chat_completion.choices[0].message.content
         return response
 
-    def stream_completion(self):
-        pass
+    def stream_completion(self, user_input):
+        self.conversation_history.append({"role": "user", "content": user_input})
+        client = Groq(api_key="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")
+        stream = client.chat.completions.create(
+            messages=self.conversation_history,
+            model="llama3-8b-8192",
+            stream=True
+        )
 
+        full_response = ""
+        buffer = ""
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                buffer += delta
+                if '\n' in buffer:
+                    lines = buffer.split('\n')
+                    for line in lines[:-1]:
+                        self.conversation_box.add_text(line + '\n', new_line=False)
+                    buffer = lines[-1]
+                self.conversation_box.refresh()
+                self.stdscr.refresh()
+                full_response += delta
+
+        if buffer:
+            self.conversation_box.add_text(buffer + '\n', new_line=False)
+        self.conversation_history.append({"role": "assistant", "content": full_response})
 
     def main_loop(self):
+        streaming = True
         try:
             while True:
-                # check for key press
-                # if a then input box
-                # else if j, k then scroll
-                #
-                #
                 key = self.stdscr.getch()
                 if key == ord('j'):
                     self.conversation_box.scroll_down()
-                    continue
-                if key == ord('k'):
+                elif key == ord('k'):
                     self.conversation_box.scroll_up()
-                    continue
-                if key == ord('i') or key == ord('a'):
-                    pass
-                else:
-                    continue
+                elif key == ord('i') or key == ord('a'):
+                    user_input = self.input_box.edit()
+                    if user_input:
+                        self.conversation_box.add_text(f"User: {user_input}\n", new_line=True)
+                        self.input_box.clear()
+                        if streaming:
+                            self.conversation_box.add_text("AI: ", new_line=False)
+                            self.stream_completion(user_input)
+                        else:
+                            response = self.request_completion(user_input)
+                            self.conversation_box.add_text(f"AI: {response}\n", new_line=True)
 
+                        self.conversation_box.scroll_to_bottom()
 
-                user_input = self.input_box.edit()
-                if user_input:
-                    self.conversation_box.add_text(f"User: {user_input}")
-                    self.input_box.clear()
-                    response = self.request_completion(user_input)
-                    self.conversation_box.add_text(f"AI: {response}") # this must be moved
-
+                self.conversation_box.refresh()
                 self.stdscr.refresh()
         except KeyboardInterrupt:
-            pass  # Exit the chat window on Ctrl+C
+            pass

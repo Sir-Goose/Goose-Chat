@@ -83,7 +83,8 @@ def display_home(stdscr):
             if key == ord('q'):
                 break
             if key == ord('n'):
-                chat_window.Chat_window(stdscr)
+                conversation = []
+                chat_window.Chat_window(stdscr, conversation)
                 break
             if key == ord('c'):
                 break
