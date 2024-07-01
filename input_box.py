@@ -1,4 +1,5 @@
 import curses
+import cursor_pulsor
 
 class MultilineChatInputBox:
     def __init__(self, window, height, width, y, x):
@@ -18,6 +19,10 @@ class MultilineChatInputBox:
         self.scroll_pos = 0
 
     def edit(self):
+        # curses.curs_set(1) # make cursor visible
+        pulser = cursor_pulsor.CursorPulser(self.window)
+        pulser.start_pulsing()
+
         while True:
             self.input_area.clear()
             for i, line in enumerate(self.lines[self.scroll_pos:self.scroll_pos + self.height - 2]):
@@ -38,8 +43,10 @@ class MultilineChatInputBox:
                 self.cursor_x = 0
                 self.scroll_if_needed()
             elif key == ord('~'):  # send
+                pulser.stop_pulsing()
                 return "\n".join(self.lines).strip()
             elif key == 27: # escape
+                pulser.stop_pulsing()
                 return # empty return back to view mode
             elif key in (curses.KEY_BACKSPACE, 127):  # Backspace
                 if self.cursor_x > 0:
@@ -80,6 +87,8 @@ class MultilineChatInputBox:
                                              chr(key) +
                                              self.lines[self.cursor_y][self.cursor_x:])
                 self.cursor_x += 1
+        # hide the cursor again
+        pulser.stop_pulsing()
 
     def scroll_if_needed(self):
         if self.cursor_y < self.scroll_pos:

@@ -29,7 +29,7 @@ class Chat_window:
         return conversation_box.ConversationBox(self.stdscr, box_height, box_width, start_y, start_x)
 
     def draw_input_box(self):
-        input_height = 5
+        input_height = 6
         input_width = self.width - 4
         input_y = self.height - input_height - 1
         input_x = 2
@@ -53,7 +53,7 @@ class Chat_window:
         client = Groq(api_key="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")
         stream = client.chat.completions.create(
             messages=self.conversation_history,
-            model="llama3-8b-8192",
+            model="llama3-70b-8192",
             stream=True
         )
 
@@ -87,6 +87,7 @@ class Chat_window:
                     self.conversation_box.scroll_up()
                 elif key == ord('i') or key == ord('a'):
                     user_input = self.input_box.edit()
+                    # curses.curs_set(0)
                     if user_input:
                         self.conversation_box.add_text(f"User: {user_input}\n", new_line=True)
                         self.input_box.clear()
