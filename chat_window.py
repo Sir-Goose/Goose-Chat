@@ -1,14 +1,17 @@
 from groq import Groq
 from groq.types.chat import chat_completion
 import conversation_box
+import conversation
 import input_box
 import curses
 import chat_engine
 
 class Chat_window:
-    def __init__(self, stdscr, conversation, model="llama3-8b-8192", name="New Chat"):
+    def __init__(self, stdscr, conversation_list, chat_position, model="llama3-8b-8192", name="New Chat"):
         self.stdscr = stdscr
-        self.conversation_history = conversation
+        self.chat_position = chat_position
+        self.conversation_list = conversation_list
+        self.conversation_history = conversation_list.chat_list[self.chat_position].conversation_history
         self.model = model
         self.name = name
         self.height, self.width = self.stdscr.getmaxyx()
@@ -105,4 +108,9 @@ class Chat_window:
                 self.conversation_box.refresh()
                 self.stdscr.refresh()
         except KeyboardInterrupt:
+            # TODO:
+            # pass chat_list to the save function
+            self.conversation_list.chat_list[self.chat_position].conversation_history = self.conversation_history
+            self.conversation_list.chat_list[self.chat_position].update_timestamp()
+            conversation.store_chats(self.conversation_list.chat_list)
             pass

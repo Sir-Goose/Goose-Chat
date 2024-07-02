@@ -1,8 +1,10 @@
 import os
+import pickle
 from groq import Groq
 import state
 import curses
 import chat_window
+import conversation
 
 title = r"""
    ______                         ________          __
@@ -20,6 +22,7 @@ def main(stdscr):
     stdscr.clear()
     stdscr.refresh()
     display_home(stdscr)
+
 
 def display_home(stdscr):
     curses.curs_set(0)  # Hide the cursor
@@ -83,8 +86,14 @@ def display_home(stdscr):
             if key == ord('q'):
                 break
             if key == ord('n'):
-                conversation = []
-                chat_window.Chat_window(stdscr, conversation)
+                # conversation_list = conversation.Conversation_List()
+                conversation_list.add_chat()
+                chat_window.Chat_window(
+                    stdscr,
+                    conversation_list,
+                    len(conversation_list.chat_list) -1,
+                    name=conversation_list.chat_list[len(conversation_list.chat_list) -1].name,
+                )
                 break
             if key == ord('c'):
                 break
@@ -110,4 +119,5 @@ def new_chat():
 
 
 if __name__ == "__main__":
+    conversation_list = conversation.Conversation_List()
     curses.wrapper(main)
