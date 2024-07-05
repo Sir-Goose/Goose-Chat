@@ -5,7 +5,7 @@ import conversation
 import input_box
 import curses
 import chat_engine
-
+# need to display the existing chat history
 class Chat_window:
     def __init__(self, stdscr, conversation_list, chat_position, model="llama3-8b-8192", name="New Chat"):
         self.stdscr = stdscr
@@ -20,8 +20,17 @@ class Chat_window:
         self.conversation_box = self.draw_conversation()
         self.input_box = self.draw_input_box()
         self.draw_hotkeys()
+        self.load_conversation_history()
         self.stdscr.refresh()
         self.main_loop()
+
+    def load_conversation_history(self):
+        for message in self.conversation_history:
+            if message['role'] == 'user':
+                self.conversation_box.add_text(f"User: {message['content']}\n", new_line=True)
+            elif message['role'] == 'assistant':
+                self.conversation_box.add_text(f"AI: {message['content']}\n", new_line=True)
+        self.conversation_box.scroll_to_bottom()
 
     def draw_title(self):
         title = f"{self.name} - {self.model}"
@@ -108,8 +117,6 @@ class Chat_window:
                 self.conversation_box.refresh()
                 self.stdscr.refresh()
         except KeyboardInterrupt:
-            # TODO:
-            # pass chat_list to the save function
             self.conversation_list.chat_list[self.chat_position].conversation_history = self.conversation_history
             self.conversation_list.chat_list[self.chat_position].update_timestamp()
             conversation.store_chats(self.conversation_list.chat_list)

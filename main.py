@@ -1,6 +1,8 @@
 import os
 import pickle
 from groq import Groq
+import saved_chats_window
+import saved_chats_window
 import state
 import curses
 import chat_window
@@ -98,7 +100,7 @@ def display_home(stdscr):
             if key == ord('c'):
                 break
             if key == ord('v'):
-                break
+                saved_chats_window.Saved_chats_window(stdscr, conversation_list)
 
 
 def new_chat():
