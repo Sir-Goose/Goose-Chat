@@ -102,5 +102,4 @@ class Saved_chats_window:
                 # self.conversation_list.save_chats()
                 conversation.store_chats(self.conversation_list.chat_list)
 
-            # Redraw the window
             self.draw_window()

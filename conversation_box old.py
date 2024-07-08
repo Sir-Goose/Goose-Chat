@@ -1,4 +1,5 @@
 import curses
+from curses import wrapper
 
 class ConversationBox:
     def __init__(self, window, height, width, y, x):
@@ -54,11 +55,9 @@ class ConversationBox:
         self.scroll_pos = max(0, len(self.lines) - (self.height - 2))
 
     def refresh(self):
-        # Clear only the part of the window that needs updating
-        self.text_win.erase()
+        self.text_win.clear()
         for i, line in enumerate(self.lines[self.scroll_pos:self.scroll_pos + self.height - 2]):
             self.text_win.addstr(i, 0, line[:self.width-2])
-        # Batch refresh calls
-        self.text_win.noutrefresh()
-        self.box.noutrefresh()
-        curses.doupdate()
+        self.box.box()
+        self.text_win.refresh()
+        self.box.refresh()

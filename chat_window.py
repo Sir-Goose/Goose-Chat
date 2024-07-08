@@ -159,7 +159,7 @@ class Chat_window:
                         self.conversation_box.scroll_to_bottom()
 
                 self.conversation_box.refresh()
-                self.stdscr.refresh()
+                #self.stdscr.refresh()
         except KeyboardInterrupt:
             self.save_chat()
             pass
