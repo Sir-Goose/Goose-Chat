@@ -21,12 +21,14 @@ class MultilineChatInputBox:
     def edit(self):
         pulser = cursor_pulsor.CursorPulser(self.window)
         pulser.start_pulsing()
+        buffer = ""
 
         while True:
             self.refresh_display()
 
             try:
                 key = self.input_area.get_wch()
+                buffer += str(key)
             except curses.error:
                 continue
 
@@ -35,12 +37,13 @@ class MultilineChatInputBox:
 
             if key == 10:  # Enter key
                 self.handle_enter()
-            elif key == ord('~'):  # send
-                pulser.stop_pulsing()
-                return "\n".join(self.lines).strip()
+            #elif key == ord('~'):  # send
+                #pulser.stop_pulsing()
+                #return "\n".join(self.lines).strip()
             elif key == 27:  # escape
                 pulser.stop_pulsing()
-                return  # empty return back to view mode
+                return "\n".join(self.lines).strip()
+                # return  # empty return back to view mode
             elif key in (curses.KEY_BACKSPACE, 127):  # Backspace
                 self.handle_backspace()
             elif key == curses.KEY_LEFT:

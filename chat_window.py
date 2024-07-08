@@ -16,6 +16,8 @@ class Chat_window:
         self.model = model
         self.name = name
         self.height, self.width = self.stdscr.getmaxyx()
+        self.mode = 0 # view mode
+        self.buffer = ""
         self.stdscr.clear()
         self.draw_title()
         self.conversation_box = self.draw_conversation()
@@ -53,18 +55,22 @@ class Chat_window:
         return input_box.MultilineChatInputBox(self.stdscr, input_height, input_width, input_y, input_x)
 
     def draw_hotkeys(self):
-        self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | A or I: Input Mode | ~: Send | Ctrl+C: Quit")
+        if self.mode == 0:
+            self.draw_hotkeys_view_mode()
+        else:
+            self.draw_hotkeys_input_mode()
+        # self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | A or I: Input Mode | ~: Send | Ctrl+C: Quit")
 
     def draw_hotkeys_view_mode(self):
         self.stdscr.move(self.height -1, 0)
         self.stdscr.clrtoeol()
-        self.stdscr.addstr(self.height - 1, 2, "A or I: Input Mode | j/k: Navigate | q: Quit | w: Save")
+        self.stdscr.addstr(self.height - 1, 2, "A or I: Input Mode | j/k: Navigate | Enter: Send | q: Quit | w: Save")
 
     def draw_hotkeys_input_mode(self):
         # First, clear the existing content on the row
         self.stdscr.move(self.height - 1, 0)  # Move to the start of the row
         self.stdscr.clrtoeol()  # Clear from cursor to end of line
-        self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | ~: Send")
+        self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode")
 
     def prompt_for_chat_name(self):
             self.stdscr.move(self.height - 1, 0)
@@ -128,6 +134,10 @@ class Chat_window:
         try:
             while True:
                 key = self.stdscr.getch()
+                if key == 10:
+                    if self.buffer:
+                        self.send_message(self.buffer, streaming)
+                        self.buffer = ""
                 if key == ord('j'):
                     self.conversation_box.scroll_down()
                 elif key == ord('k'):
@@ -147,19 +157,22 @@ class Chat_window:
                     self.draw_hotkeys_view_mode()
                     # curses.curs_set(0)
                     if user_input:
-                        self.conversation_box.add_text(f"User: {user_input}\n", new_line=True)
-                        self.input_box.clear()
-                        if streaming:
-                            self.conversation_box.add_text("AI: ", new_line=True)
-                            self.stream_completion(user_input)
-                        else:
-                            response = self.request_completion(user_input)
-                            self.conversation_box.add_text(f"AI: {response}\n", new_line=True)
-
-                        self.conversation_box.scroll_to_bottom()
-
-                self.conversation_box.refresh()
-                #self.stdscr.refresh()
+                        self.buffer = user_input
         except KeyboardInterrupt:
             self.save_chat()
             pass
+
+    def send_message(self, buffer, streaming):
+        self.conversation_box.add_text(f"User: {buffer}\n", new_line=True)
+        self.input_box.clear()
+        if streaming:
+            self.conversation_box.add_text("AI: ", new_line=True)
+            self.stream_completion(buffer)
+        else:
+            response = self.request_completion(buffer)
+            self.conversation_box.add_text(f"AI: {response}\n", new_line=True)
+
+            self.conversation_box.scroll_to_bottom()
+
+        self.conversation_box.refresh()
+                #self.stdscr.refresh()
