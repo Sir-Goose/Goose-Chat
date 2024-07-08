@@ -1,5 +1,6 @@
 import curses
 import chat_window
+import conversation
 
 class Saved_chats_window:
     def __init__(self, stdscr, conversation_list):
@@ -38,7 +39,7 @@ class Saved_chats_window:
                     self.stdscr.addstr(i + 2, 2, chat_name)
 
     def draw_footer(self):
-        footer = "j/k: Navigate | Enter: Open Chat | q: Quit"
+        footer = "j/k: Navigate | Enter: Open Chat | r: Rename | q: Quit"
         self.stdscr.addstr(self.height - 1, 0, footer)
 
     def main_loop(self):
@@ -50,6 +51,8 @@ class Saved_chats_window:
                 self.move_cursor_down()
             elif key == ord('k'):
                 self.move_cursor_up()
+            elif key == ord('r'):
+                self.rename_chat()
             elif key == 10:  # Enter key
                 self.open_selected_chat()
             self.draw_window()
@@ -76,3 +79,28 @@ class Saved_chats_window:
                 name=chat.name
             )
             self.draw_window()  # Redraw the saved chats window when returning from chat
+
+    def rename_chat(self):
+        if 0 <= self.current_position < len(self.chat_list):
+            chat = self.chat_list[self.current_position]
+
+            # Clear the footer and prompt for new name
+            self.stdscr.move(self.height - 1, 0)
+            self.stdscr.clrtoeol()
+            self.stdscr.addstr(self.height - 1, 0, f"Enter new name for '{chat.name}': ")
+            self.stdscr.refresh()
+
+            # Get user input
+            curses.echo()
+            new_name = self.stdscr.getstr(self.height - 1, len(f"Enter new name for '{chat.name}': ")).decode('utf-8')
+            curses.noecho()
+
+            if new_name:
+                # Update the chat name
+                chat.name = new_name
+                # Save the updated chat list
+                # self.conversation_list.save_chats()
+                conversation.store_chats(self.conversation_list.chat_list)
+
+            # Redraw the window
+            self.draw_window()
