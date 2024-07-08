@@ -5,6 +5,7 @@ import conversation
 import input_box
 import curses
 import chat_engine
+
 # need to display the existing chat history
 class Chat_window:
     def __init__(self, stdscr, conversation_list, chat_position, model="llama3-8b-8192", name="New Chat"):
@@ -33,6 +34,8 @@ class Chat_window:
         self.conversation_box.scroll_to_bottom()
 
     def draw_title(self):
+        self.stdscr.move(0, 0)
+        self.stdscr.clrtoeol()
         title = f"{self.name} - {self.model}"
         start_x = max(0, (self.width // 2) - (len(title)// 2))
         self.stdscr.addstr(0, start_x, title)
@@ -51,6 +54,36 @@ class Chat_window:
 
     def draw_hotkeys(self):
         self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | A or I: Input Mode | ~: Send | Ctrl+C: Quit")
+
+    def draw_hotkeys_view_mode(self):
+        self.stdscr.move(self.height -1, 0)
+        self.stdscr.clrtoeol()
+        self.stdscr.addstr(self.height - 1, 2, "A or I: Input Mode | j/k: Navigate | q: Quit | w: Save")
+
+    def draw_hotkeys_input_mode(self):
+        # First, clear the existing content on the row
+        self.stdscr.move(self.height - 1, 0)  # Move to the start of the row
+        self.stdscr.clrtoeol()  # Clear from cursor to end of line
+        self.stdscr.addstr(self.height - 1, 2, "Esc: View Mode | ~: Send")
+
+    def prompt_for_chat_name(self):
+            self.stdscr.move(self.height - 1, 0)
+            self.stdscr.clrtoeol()
+            self.stdscr.addstr(self.height - 1, 2, "Enter chat name: ")
+            curses.echo()
+            chat_name = self.stdscr.getstr(self.height - 1, 19, 50).decode('utf-8')
+            curses.noecho()
+            return chat_name
+
+    def save_chat(self, new_name=None):
+            if new_name:
+                self.name = new_name
+                self.conversation_list.chat_list[self.chat_position].name = new_name
+            self.conversation_list.chat_list[self.chat_position].conversation_history = self.conversation_history
+            self.conversation_list.chat_list[self.chat_position].update_timestamp()
+            conversation.store_chats(self.conversation_list.chat_list)
+            self.draw_title()  # Redraw the title with the new name
+
 
     def request_completion(self, user_input):
         self.conversation_history.append({"role": "user", "content": user_input})
@@ -99,14 +132,25 @@ class Chat_window:
                     self.conversation_box.scroll_down()
                 elif key == ord('k'):
                     self.conversation_box.scroll_up()
+                elif key == ord('q'):
+                    self.save_chat()
+                    break
+                elif key == ord('w'):
+                    chat_name = self.prompt_for_chat_name()
+                    if chat_name:
+                        self.save_chat(new_name=chat_name)
+                        self.draw_hotkeys_view_mode()
                 elif key == ord('i') or key == ord('a'):
+                    self.draw_hotkeys_input_mode()
+                    self.stdscr.refresh()
                     user_input = self.input_box.edit()
+                    self.draw_hotkeys_view_mode()
                     # curses.curs_set(0)
                     if user_input:
                         self.conversation_box.add_text(f"User: {user_input}\n", new_line=True)
                         self.input_box.clear()
                         if streaming:
-                            self.conversation_box.add_text("AI: ", new_line=False)
+                            self.conversation_box.add_text("AI: ", new_line=True)
                             self.stream_completion(user_input)
                         else:
                             response = self.request_completion(user_input)
@@ -117,7 +161,5 @@ class Chat_window:
                 self.conversation_box.refresh()
                 self.stdscr.refresh()
         except KeyboardInterrupt:
-            self.conversation_list.chat_list[self.chat_position].conversation_history = self.conversation_history
-            self.conversation_list.chat_list[self.chat_position].update_timestamp()
-            conversation.store_chats(self.conversation_list.chat_list)
+            self.save_chat()
             pass
