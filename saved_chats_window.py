@@ -39,7 +39,7 @@ class Saved_chats_window:
                     self.stdscr.addstr(i + 2, 2, chat_name)
 
     def draw_footer(self):
-        footer = "j/k: Navigate | Enter: Open Chat | r: Rename | q: Quit"
+        footer = "j/k: Navigate | Enter: Open Chat | r: Rename | d: Delete | q: Quit"
         self.stdscr.addstr(self.height - 1, 0, footer)
 
     def main_loop(self):
@@ -53,6 +53,8 @@ class Saved_chats_window:
                 self.move_cursor_up()
             elif key == ord('r'):
                 self.rename_chat()
+            elif key == ord('d'):
+                self.delete_chat()
             elif key == 10:  # Enter key
                 self.open_selected_chat()
             self.draw_window()
@@ -100,6 +102,25 @@ class Saved_chats_window:
                 chat.name = new_name
                 # Save the updated chat list
                 # self.conversation_list.save_chats()
+                conversation.store_chats(self.conversation_list.chat_list)
+
+            self.draw_window()
+
+    def delete_chat(self):
+        if 0 <= self.current_position < len(self.chat_list):
+            chat = self.chat_list[self.current_position]
+
+            self.stdscr.move(self.height - 1, 0)
+            self.stdscr.clrtoeol()
+            self.stdscr.addstr(self.height - 1, 0, f"Delete chat '{chat.name}'? y/n: ")
+            self.stdscr.refresh()
+
+            curses.echo()
+            confirmation = self.stdscr.getstr(self.height - 1, len(f"Delete chat '{chat.name}'? y/n: ")).decode('utf-8')
+            curses.noecho()
+
+            if confirmation == 'y':
+                self.chat_list.pop(self.current_position)
                 conversation.store_chats(self.conversation_list.chat_list)
 
             self.draw_window()
