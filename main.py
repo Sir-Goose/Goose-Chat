@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 from groq import Groq
 import saved_chats_window
@@ -20,9 +21,9 @@ title = r"""
 # global state
 # s = state.State()
 def main(stdscr):
-    curses.curs_set(0)  # Hide the cursor
-    stdscr.clear()
-    stdscr.refresh()
+    #curses.curs_set(0)  # Hide the cursor
+    #stdscr.clear()
+    #stdscr.refresh()
     display_home(stdscr)
 
 
@@ -86,6 +87,7 @@ def display_home(stdscr):
     while True:
             key = stdscr.getch()
             if key == ord('q'):
+                sys.exit(0)
                 break
             if key == ord('n'):
                 # conversation_list = conversation.Conversation_List()
@@ -101,6 +103,8 @@ def display_home(stdscr):
                 break
             if key == ord('v'):
                 saved_chats_window.Saved_chats_window(stdscr, conversation_list)
+                display_home(stdscr)
+
 
 
 def new_chat():
