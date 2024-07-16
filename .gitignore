@@ -4,6 +4,8 @@ config.json
 .env
 .DS_store
 pyrightconfig.json
+.idea
+.zed
 
 # Byte-compiled / optimized / DLL files
 *.py[cod]
