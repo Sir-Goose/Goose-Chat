@@ -2,6 +2,8 @@ chats.pickle
 # Ignore configuration files
 config.json
 .env
+.DS_store
+pyrightconfig.json
 
 # Byte-compiled / optimized / DLL files
 *.py[cod]
