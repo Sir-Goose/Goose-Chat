@@ -8,6 +8,7 @@ import state
 import curses
 import chat_window
 import conversation
+import get_key
 
 title = r"""
    ______                         ________          __
@@ -108,7 +109,7 @@ def display_home(stdscr):
 
 
 def new_chat():
-    key = "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"
+    key = get_key.get_api_key()
     client = Groq(
     api_key=key,
     )

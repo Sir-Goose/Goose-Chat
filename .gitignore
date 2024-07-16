@@ -7,6 +7,7 @@ pyrightconfig.json
 .idea
 .zed
 chats.pickle
+key.txt
 
 # Byte-compiled / optimized / DLL files
 *.py[cod]

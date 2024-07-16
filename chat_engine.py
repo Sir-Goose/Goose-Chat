@@ -1,5 +1,6 @@
 from groq import Groq
 from groq.types.chat import chat_completion
+import get_key
 
 def completion(key, model, conversation_history):
     client = Groq(api_key=key)
@@ -22,7 +23,7 @@ def stream_completion(key, model, conversation_history):
 
 # old
 def new_chat():
-    key = "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"
+    key = get_key.get_api_key()
     client = Groq(
     api_key=key,
     )
