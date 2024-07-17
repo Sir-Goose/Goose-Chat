@@ -19,17 +19,18 @@ class MultilineChatInputBox:
         self.scroll_pos = 0
 
     def edit(self):
+        curses.set_escdelay(1)
         pulser = cursor_pulsor.CursorPulser(self.window)
         pulser.start_pulsing()
-        buffer = ""
+        #buffer = ""
 
         while True:
             self.refresh_display()
 
             try:
                 key = self.input_area.get_wch()
-                buffer += str(key)
-            except curses.error:
+                #buffer += str(key)
+            except:
                 continue
 
             if isinstance(key, str):
@@ -43,7 +44,7 @@ class MultilineChatInputBox:
             elif key == 27:  # escape
                 pulser.stop_pulsing()
                 return "\n".join(self.lines).strip()
-                # return  # empty return back to view mode
+                #return  # empty return back to view mode
             elif key in (curses.KEY_BACKSPACE, 127):  # Backspace
                 self.handle_backspace()
             elif key == curses.KEY_LEFT:
@@ -59,7 +60,7 @@ class MultilineChatInputBox:
             elif 32 <= key <= 126 or key > 127:  # Printable characters including multi-byte
                 self.insert_char(chr(key))
 
-        pulser.stop_pulsing()
+        #pulser.stop_pulsing()
 
     def refresh_display(self):
         self.input_area.clear()
