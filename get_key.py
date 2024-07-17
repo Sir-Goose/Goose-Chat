@@ -4,8 +4,6 @@ def get_api_key():
             api_key = file.read().strip()
         return api_key
     except FileNotFoundError:
-        print(f"Error: The file was not found.")
-        return None
+        raise FileNotFoundError("Error: The file key.txt was not found.") from None
     except IOError:
-        print(f"Error: Unable to read the file'.")
-        return None
+        raise IOError("Error: Unable to read the file key.txt.") from None
