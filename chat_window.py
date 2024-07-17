@@ -5,6 +5,7 @@ import conversation
 import input_box
 import curses
 import chat_engine
+import get_key
 
 # need to display the existing chat history
 class Chat_window:
@@ -94,7 +95,7 @@ class Chat_window:
     def request_completion(self, user_input):
         self.conversation_history.append({"role": "user", "content": user_input})
         chat_completion = chat_engine.completion(
-            "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",
+            get_key.get_api_key(),
             self.model,
             self.conversation_history)
 
@@ -103,7 +104,7 @@ class Chat_window:
 
     def stream_completion(self, user_input):
         self.conversation_history.append({"role": "user", "content": user_input})
-        client = Groq(api_key="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")
+        client = Groq(api_key=get_key.get_api_key())
         stream = client.chat.completions.create(
             messages=self.conversation_history,
             model=self.model,
