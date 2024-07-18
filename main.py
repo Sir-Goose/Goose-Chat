@@ -11,6 +11,7 @@ import chat_window
 import conversation
 import get_key
 import logging
+import threading
 
 logging.basicConfig(filename='chat_app_debug.log', level=logging.DEBUG)
 
@@ -21,6 +22,7 @@ title = r"""
 / /_/ / /_/ / /_/ (__  )  __/  / /___/ / / / /_/ / /_
 \____/\____/\____/____/\___/   \____/_/ /_/\__,_/\__/
 """
+active_models = []
 
 
 # global state
@@ -29,11 +31,11 @@ def main(stdscr):
     #curses.curs_set(0)  # Hide the cursor
     #stdscr.clear()
     #stdscr.refresh()
-
     display_home(stdscr)
 
 
 def display_home(stdscr):
+
     curses.curs_set(0)  # Hide the cursor
     curses.start_color()  # Start color functionality
     # curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Initialize color pair 1
@@ -102,14 +104,14 @@ def display_home(stdscr):
                     stdscr,
                     conversation_list,
                     len(conversation_list.chat_list) -1,
-                    models=get_active_model_names(),
+                    models=active_models,
                     name=conversation_list.chat_list[len(conversation_list.chat_list) -1].name,
                 )
                 break
             if key == ord('c'):
                 break
             if key == ord('v'):
-                saved_chats_window.Saved_chats_window(stdscr, conversation_list, models=get_active_model_names())
+                saved_chats_window.Saved_chats_window(stdscr, conversation_list, models=active_models)
                 display_home(stdscr)
 
 
@@ -128,13 +130,15 @@ def get_active_model_names():
 
         data = response.json()
         active_model_names = [model['id'] for model in data.get('data', []) if model.get('active', False)]
-
-        return active_model_names
+        global active_models
+        active_models = active_model_names
 
     except requests.exceptions.RequestException as e:
         raise e
-        return []
+        active_models = []
 
 if __name__ == "__main__":
     conversation_list = conversation.Conversation_List()
+    thread = threading.Thread(target=get_active_model_names())
+    thread.start()
     curses.wrapper(main)
