@@ -62,14 +62,14 @@ def display_home(stdscr):
     menu_items = [
         "New Chat",
         "View Chats",
-        "Change Model",
+        "Edit Config",
         "Quit"
     ]
 
     menu_buttons = [
         "n",
         "v",
-        "c",
+        "m",
         "q"
     ]
 

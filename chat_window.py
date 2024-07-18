@@ -20,7 +20,7 @@ class Chat_window:
         self.chat_position = chat_position
         self.conversation_list = conversation_list
         self.conversation_history = conversation_list.chat_list[self.chat_position].conversation_history
-        self.available_models = ["llama3-8b-8192", "llama3-70b-8192", "gemma2-9b-it"]
+        self.available_models = ["llama3-8b-8192", "llama3-70b-8192", "gemma2-9b-it"] # todo get dynamically
         self.model = model
         self.name = name
         self.height, self.width = self.stdscr.getmaxyx()
