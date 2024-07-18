@@ -6,6 +6,12 @@ import input_box
 import curses
 import chat_engine
 import get_key
+import model_switcher
+
+import logging
+
+# Set up logging
+logging.basicConfig(filename='chat_app_debug.log', level=logging.DEBUG)
 
 # need to display the existing chat history
 class Chat_window:
@@ -14,6 +20,7 @@ class Chat_window:
         self.chat_position = chat_position
         self.conversation_list = conversation_list
         self.conversation_history = conversation_list.chat_list[self.chat_position].conversation_history
+        self.available_models = ["llama3-8b-8192", "llama3-70b-8192", "gemma2-9b-it"]
         self.model = model
         self.name = name
         self.height, self.width = self.stdscr.getmaxyx()
@@ -65,7 +72,7 @@ class Chat_window:
     def draw_hotkeys_view_mode(self):
         self.stdscr.move(self.height -1, 0)
         self.stdscr.clrtoeol()
-        self.stdscr.addstr(self.height - 1, 2, "A or I: Input Mode | j/k: Navigate | Enter: Send | q: Quit | w: Save")
+        self.stdscr.addstr(self.height - 1, 2, "A or I: Input Mode | j/k: Navigate | Enter: Send | m: Model | q: Quit | w: Save")
 
     def draw_hotkeys_input_mode(self):
         # First, clear the existing content on the row
@@ -143,6 +150,16 @@ class Chat_window:
                     self.conversation_box.scroll_down()
                 elif key == ord('k'):
                     self.conversation_box.scroll_up()
+                elif key == ord('m'):
+                    curses.curs_set(0)
+                    popup = model_switcher.ModelSwitcherPopup(self.stdscr, self.available_models)
+                    popup.draw()
+                    new_model = popup.handle_input()
+                    if new_model:
+                        self.model = new_model
+                        self.draw_title()
+                    self.stdscr.touchwin()
+                    self.stdscr.refresh()
                 elif key == ord('q'):
                     self.save_chat()
                     break
