@@ -2,6 +2,7 @@ import os
 import sys
 import pickle
 from groq import Groq
+import requests
 import saved_chats_window
 import saved_chats_window
 import state
@@ -9,6 +10,9 @@ import curses
 import chat_window
 import conversation
 import get_key
+import logging
+
+logging.basicConfig(filename='chat_app_debug.log', level=logging.DEBUG)
 
 title = r"""
    ______                         ________          __
@@ -25,6 +29,7 @@ def main(stdscr):
     #curses.curs_set(0)  # Hide the cursor
     #stdscr.clear()
     #stdscr.refresh()
+
     display_home(stdscr)
 
 
@@ -97,33 +102,38 @@ def display_home(stdscr):
                     stdscr,
                     conversation_list,
                     len(conversation_list.chat_list) -1,
+                    models=get_active_model_names(),
                     name=conversation_list.chat_list[len(conversation_list.chat_list) -1].name,
                 )
                 break
             if key == ord('c'):
                 break
             if key == ord('v'):
-                saved_chats_window.Saved_chats_window(stdscr, conversation_list)
+                saved_chats_window.Saved_chats_window(stdscr, conversation_list, models=get_active_model_names())
                 display_home(stdscr)
 
 
+def get_active_model_names():
+    api_key = get_key.get_api_key()
+    url = "https://api.groq.com/openai/v1/models"
 
-def new_chat():
-    key = get_key.get_api_key()
-    client = Groq(
-    api_key=key,
-    )
-    conversation_history = []
-    while True:
-        print("user: ")
-        user_message = input()
-        conversation_history.append({"role": "user", "content": user_message})
-        chat_completion = client.chat.completions.create(
-            messages=conversation_history,
-            model="llama3-8b-8192",
-        )
-        print(chat_completion.choices[0].message.content)
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
 
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raise an exception for bad status codes
+
+        data = response.json()
+        active_model_names = [model['id'] for model in data.get('data', []) if model.get('active', False)]
+
+        return active_model_names
+
+    except requests.exceptions.RequestException as e:
+        raise e
+        return []
 
 if __name__ == "__main__":
     conversation_list = conversation.Conversation_List()

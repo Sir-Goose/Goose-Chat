@@ -15,13 +15,13 @@ logging.basicConfig(filename='chat_app_debug.log', level=logging.DEBUG)
 
 # need to display the existing chat history
 class Chat_window:
-    def __init__(self, stdscr, conversation_list, chat_position, model="llama3-8b-8192", name="New Chat"):
+    def __init__(self, stdscr, conversation_list, chat_position, models=["llama3-8b-8192"], name="New Chat"):
         self.stdscr = stdscr
         self.chat_position = chat_position
         self.conversation_list = conversation_list
         self.conversation_history = conversation_list.chat_list[self.chat_position].conversation_history
-        self.available_models = ["llama3-8b-8192", "llama3-70b-8192", "gemma2-9b-it"] # todo get dynamically
-        self.model = model
+        self.available_models = models
+        self.model = models[0]
         self.name = name
         self.height, self.width = self.stdscr.getmaxyx()
         self.mode = 0 # view mode

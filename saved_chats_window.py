@@ -3,10 +3,11 @@ import chat_window
 import conversation
 
 class Saved_chats_window:
-    def __init__(self, stdscr, conversation_list):
+    def __init__(self, stdscr, conversation_list, models=["llama3-8b-8192"]):
         self.stdscr = stdscr
         self.conversation_list = conversation_list
         self.chat_list = conversation_list.chat_list
+        self.models = models
         self.height, self.width = self.stdscr.getmaxyx()
         self.current_position = 0
         self.top_of_page = 0
@@ -78,6 +79,7 @@ class Saved_chats_window:
                 self.stdscr,
                 self.conversation_list,
                 self.current_position,
+                models=self.models,
                 name=chat.name
             )
             self.draw_window()  # Redraw the saved chats window when returning from chat
