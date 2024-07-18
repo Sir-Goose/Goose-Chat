@@ -14,8 +14,10 @@ class ModelSwitcherPopup:
         logging.debug("ModelSwitcherPopup initialized")
 
     def create_window(self):
+        max_model_length = max(len(model) for model in self.available_models)
+        window_width = max(40, max_model_length + 6)  # Add padding for borders and selector
         height = min(len(self.available_models) + 4, self.height - 4)
-        width = 40
+        width = min(window_width, self.width - 4)
         start_y = (self.height - height) // 2
         start_x = (self.width - width) // 2
         window = curses.newwin(height, width, start_y, start_x)
@@ -27,11 +29,15 @@ class ModelSwitcherPopup:
         self.window.erase()
         self.window.box()
         self.window.addstr(1, 2, "Select a model:")
+        max_width = self.window.getmaxyx()[1] - 4  # Maximum width for model names
         for i, model in enumerate(self.available_models):
+            y = i + 2
+            if y >= self.window.getmaxyx()[0] - 1:  # Check if we're about to go out of bounds
+                break
             if i == self.selected_index:
-                self.window.addstr(i + 2, 2, f"> {model}", curses.A_REVERSE)
+                self.window.addstr(y, 2, "> " + model[:max_width-2], curses.A_REVERSE)
             else:
-                self.window.addstr(i + 2, 2, f"  {model}")
+                self.window.addstr(y, 2, "  " + model[:max_width-2])
         self.window.refresh()
         logging.debug(f"Draw completed. Selected index: {self.selected_index}")
 
