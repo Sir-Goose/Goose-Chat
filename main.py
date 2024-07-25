@@ -4,7 +4,6 @@ import pickle
 from groq import Groq
 import requests
 import saved_chats_window
-import saved_chats_window
 import state
 import curses
 import chat_window
